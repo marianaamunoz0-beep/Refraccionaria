@@ -3,9 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="recetas.css">
+  <title>Simulación de Notificación Push WhatsApp</title>
+</head>
+<body style="font-family: Arial; text-align:center; margin-top:60px;">
+
+    <h2>💬 Notificación tipo WhatsApp</h2>
+    <p>Haz clic para simular una notificación como si fuera un mensaje nuevo.</p>
+
+    <button id="btnNotificar"
+        style="background:#25D366;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;">
+        Mostrar Notificación WhatsApp
+    </button>
+
+    <script>
+        // Registrar el Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('✔️ Service Worker registrado'))
+                .catch(err => console.error('❌ Error al registrar SW', err));
+        }
+
+        // Evento al presionar el botón
+document.getElementById('btnNotificar').addEventListener('click', async () => {
+
+    const permiso = await Notification.requestPermission();
+    if (permiso !== 'granted') {
+        alert('Permite las notificaciones para continuar.');
+        return;
+    }
+
+    // Obtener registro del Service Worker
+    const reg = await navigator.serviceWorker.getRegistration();
+
+    // Mostrar notificación simulando mensaje de WhatsApp
+    reg.showNotification('WhatsApp', {
+        body: '📩 Nuevo mensaje de Mariana Muñoz: “Hola, ¿todo bien con el proyecto?”',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
+        badge: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
+        image: 'https://cdn.pixabay.com/photo/2021/05/25/09/13/chat-6283454_1280.png',
+        vibrate: [200, 100, 200],
+        actions: [
+            { action: 'responder', title: 'Responder' },
+            { action: 'ver', title: 'Ver mensaje' }
+        ],
+        tag: 'whatsapp-message',
+        renotify: true
+    });
+
+});
+</script>
+
+<script>
+/* ---------- Registro del Service Worker (asegúrate que sw.js esté en la raíz o ajusta la ruta) ---------- */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => {
+      console.log('✔️ Service Worker registrado:', reg.scope);
+    })
+    .catch(err => console.error('❌ Error al registrar SW:', err));
+}
+
+/* ---------- Función utilitaria para pedir permiso ---------- */
+async function solicitarPermisoNotificaciones() {
+  if (!('Notification' in window)) {
+    alert('Este navegador no soporta notificaciones.');
+    return false;
+  }
+  if (Notification.permission === 'granted') return true;
+  const permiso = await Notification.requestPermission();
+  return permiso === 'granted';
+}
+
+/* ---------- Escuchar submit del formulario de nueva receta ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form[action="#"]'); // ajusta selector si tienes varios formularios
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Obtener campos
+    const nombre = (document.getElementById('nombre') || {value:''}).value.trim();
+    const ingredientes = (document.getElementById('ingredientes') || {value:''}).value.trim();
+    const instrucciones = (document.getElementById('instrucciones') || {value:''}).value.trim();
+
+    // Validación sencilla
+    if (!nombre) {
+      alert('Por favor escribe el nombre de la receta.');
+      return;
+    }
+
+    // Pedir permiso de notificación (si no está concedido)
+    const permitido = await solicitarPermisoNotificaciones();
+    if (!permitido) {
+      alert('Necesitas permitir notificaciones para recibir la alerta de la receta.');
+      return;
+    }
+
+    // Preparar el cuerpo de la notificación (truncar si es muy largo)
+    const maxBody = 180;
+    let cuerpo = `Ingredientes: ${ingredientes || '—'}\nInstrucciones: ${instrucciones || '—'}`;
+    if (cuerpo.length > maxBody) {
+      cuerpo = cuerpo.slice(0, maxBody - 3) + '...';
+    }
+
+    // Intentar obtener el registro del SW
+    const swReg = await navigator.serviceWorker.getRegistration();
+
+    const notificationOptions = {
+      body: cuerpo,
+      icon: '/imagenes/fav.png',           // ajusta ruta del icono
+      badge: '/imagenes/fav.png',
+      image: undefined,                    // opcional, pon URL si quieres imagen
+      vibrate: [100, 50, 100],
+      tag: 'recetario-nueva-receta',
+      renotify: true,
+      data: {                              // datos que quieres pasar al SW al click
+        url: location.href,                // abrir la misma página (o una ruta específica)
+        nombre,
+        ingredientes,
+        instrucciones
+      },
+      actions: [
+        { action: 'abrir', title: 'Abrir Receta' },
+        { action: 'compartir', title: 'Compartir' }
+      ]
+    };
+
+    // Mostrar notificación usando el Service Worker si existe, si no usar Notification API directamente
+    try {
+      if (swReg && swReg.showNotification) {
+        await swReg.showNotification(`Nueva receta: ${nombre}`, notificationOptions);
+      } else {
+        // Fallback: notificación desde la ventana principal
+        new Notification(`Nueva receta: ${nombre}`, notificationOptions);
+      }
+    } catch (err) {
+      console.error('Error mostrando notificación:', err);
+    }
+
+    // Aquí puedes seguir guardando la receta a localStorage o enviarla a servidor
+    // Ejemplo: limpiar formulario
+    form.reset();
+  });
+});
+</script>
+
+
 
   <!-- Ícono de la app -->
-  <link rel="shortcut icon" href="img/fav.png" type="image/x-icon">
+  <link rel="shortcut icon" href="imagenes/fav.png" type="image/x-icon">
 
   <!-- Configuración de Meta etiquetas para PWA -->
   <meta name="theme-color" content="#31FB00">
@@ -15,8 +163,8 @@
   <!-- Meta etiquetas PWA para Apple -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="img/fav.png">
-  <link rel="apple-touch-startup-image" href="img/fav.png">
+  <link rel="apple-touch-icon" href="imagenes/fav.png">
+  <link rel="apple-touch-startup-image" href="imagenes/fav.png">
 
   <!-- Manifest -->
   <link rel="manifest" href="manifest.json">
@@ -34,7 +182,7 @@
 <header id="main-header">
   <div class="container">
     <a href="#inicio">
-      <img src="img/img1.jpeg" alt="Logo Recetario" id="logo">
+      <img src="imagenes/img1.jpeg" alt="Logo Recetario" id="logo">
     </a>
     <h1>Recetario Personal</h1>
     <nav>
@@ -56,12 +204,12 @@
   <h2>Bienvenido a tu Recetario</h2>
   <div class="carousel">
     <div class="slides">
-      <img src="img/img1.jpeg" alt="Receta 1" width="200" height="120">
-      <img src="img/img2.webp" alt="Receta 2" width="200" height="120">
-      <img src="img/img3.jpeg" alt="Receta 3" width="200" height="120">
-      <img src="img/img4.jpg" alt="Receta 4" width="200" height="120">
-      <img src="img/img5.jpeg" alt="Receta 5" width="200" height="120">
-      <img src="img/img6.jpeg" alt="Receta 6" width="200" height="120">
+      <img src="imagenes/img1.jpeg" alt="Receta 1" width="200" height="120">
+      <img src="imagenes/img2.webp" alt="Receta 2" width="200" height="120">
+      <img src="imagenes/img3.jpeg" alt="Receta 3" width="200" height="120">
+      <img src="imagenes/img4.jpg" alt="Receta 4" width="200" height="120">
+      <img src="imagenes/img5.jpeg" alt="Receta 5" width="200" height="120">
+      <img src="imagenes/img6.jpeg" alt="Receta 6" width="200" height="120">
     </div>
   </div>
 </section>
@@ -87,44 +235,47 @@
   <div class="grid">
     <div class="card">
       <div class="thumb">
-        <img src="img/img1.jpeg" alt="Receta especial">
+        <img src="imagenes/img1.jpeg" alt="Receta especial">
       </div>
       <h4>Receta especial</h4>
       <p>Pequeña explicación de la receta.</p>
     </div>
     <div class="card">
       <div class="thumb">
-        <img src="img/img2.webp" alt="Postre rápido">
+        <img src="imagenes/img2.webp" alt="Postre rápido">
       </div>
       <h4>Postre rápido</h4>
       <p>Pequeña explicación de la receta.</p>
     </div>
     <div class="card">
       <div class="thumb">
-        <img src="img/img3.jpeg" alt="Bebida refrescante">
+        <img src="imagenes/img3.jpeg" alt="Bebida refrescante">
       </div>
       <h4>Bebida refrescante</h4>
       <p>Pequeña explicación de la receta.</p>
     </div>
   </div>
 </section>
-
-<!-- ====== FORMULARIO NUEVA RECETA ====== -->
+<!-- ====== FORMULARIO NUEVA RECETA (REDUCIDO) ====== -->
 <section class="section" id="nueva-receta">
-  <h3>Agregar Nueva Receta</h3>
-  <form action="#" method="POST">
-    <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" name="nombre" placeholder="Nombre de la receta">
+  <h3 style="font-size: 16px; margin-bottom: 8px;">Agregar Nueva Receta</h3>
 
-    <label for="ingredientes">Ingredientes:</label>
-    <textarea id="ingredientes" name="ingredientes" placeholder="Lista de ingredientes"></textarea>
+  <form action="#" method="POST" class="form-mini">
 
-    <label for="instrucciones">Instrucciones:</label>
-    <textarea id="instrucciones" name="instrucciones" placeholder="Paso a paso de la receta"></textarea>
+    <input type="text" id="nombre" name="nombre" placeholder="Nombre de la receta" class="input-mini">
 
-    <button type="submit">Guardar Receta</button>
+    <textarea id="ingredientes" name="ingredientes" placeholder="Ingredientes" class="input-mini textarea-mini"></textarea>
+
+    <textarea id="instrucciones" name="instrucciones" placeholder="Instrucciones" class="input-mini textarea-mini"></textarea>
+
+    <button type="submit" class="btn-mini-small">Notificación</button>
+
+
+    
+
   </form>
 </section>
+
 
 <!-- ====== VIDEOS DE RECETAS ====== -->
 <section class="section" id="videos-recetas">
@@ -145,6 +296,9 @@
   </div>
 </section>
 
+<!-- formulario -->
+
+
 <!-- ====== FOOTER / CONTACTO ====== -->
 <footer id="contacto">
   <div class="container">
@@ -157,6 +311,13 @@
     </ul>
   </div>
 </footer>
+
+
+</body>
+</html>
+
+
+
 
 <!-- Registro del Service Worker -->
 <script>

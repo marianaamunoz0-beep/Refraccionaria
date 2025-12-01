@@ -382,3 +382,143 @@ footer ul li img:hover {
     margin: 0 auto;
   }
 }
+
+:root {
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --accent: #ff8a00;
+  --accent-2: #ffb86b;
+  --muted: #65748b;
+  --border: #e6e9ee;
+  --radius: 14px;
+  --shadow: 0 6px 20px rgba(20,30,50,0.08);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Contenedor principal */
+.recetario-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px;
+  background: linear-gradient(180deg, #fbfbfd 0%, var(--bg) 100%);
+}
+
+/* Grid de formularios */
+.recetarios-grid {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 980px) {
+  .recetarios-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tarjeta del formulario */
+.recetario-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.recetario-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 40px rgba(20,30,50,0.1);
+}
+
+/* Encabezado */
+.recetario-card h2 {
+  margin: 0 0 14px 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Campos del formulario */
+.recetario-card label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 12px 0 6px 0;
+}
+
+.recetario-card input[type="text"],
+.recetario-card input[type="number"],
+.recetario-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  color: #0f1724;
+}
+
+.recetario-card textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.recetario-card input:focus,
+.recetario-card textarea:focus {
+  border-color: rgba(255,138,0,0.9);
+  box-shadow: 0 6px 18px rgba(255,138,0,0.08);
+}
+
+/* Fila doble */
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media(min-width:520px){
+  .row.equal {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Botón */
+.recetario-card button[type="submit"] {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  color: white;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255,138,0,0.12);
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.recetario-card button[type="submit"]:hover {
+  opacity: 0.95;
+}
+
+.msg {
+  background: #e6fff4;
+  border: 1px solid #baf0d6;
+  color: #054a2f;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  display: none;
+  margin-top: 12px;
+}
+
+
