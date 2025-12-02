@@ -1,4 +1,4 @@
-/* ======= RESETEO GENERAL ======= */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -520,5 +520,35 @@ footer ul li img:hover {
   display: none;
   margin-top: 12px;
 }
+
+/* ====== MENÚ FIJO REAL Y RESPONSIVO ====== */
+
+/* Mantiene fijo el nav siempre */
+nav {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  z-index: 99999;
+  padding: 12px 0;
+  display: flex;
+  justify-content: space-evenly;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Evita que lo de móvil lo haga vertical */
+@media (max-width: 1000px) {
+  #main-header nav ul {
+    flex-direction: row !important;
+    gap: 10px !important;
+  }
+}
+
+/* Ajusta el espacio del contenido para que no se oculte debajo del menú */
+body {
+  padding-top: 80px !important;
+}
+
 
 
