@@ -1,87 +1,73 @@
-/* ============================
-   REGISTRO DEL SERVICE WORKER
-============================ */
-if ('serviceWorker' in navigator) {
-    console.log('puedes usar los Service Workers del navegador');
-
-    navigator.serviceWorker.register('./sw.js')
-        .then(res => console.log('ServiceWorker cargado al 100%', res))
-        .catch(err => console.log('El ServiceWorker falló', err));
-} else {
-    console.log('NO PUEDES USAR los Service Workers del navegador');
+// =============================
+//       SERVICE WORKER
+// =============================
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js")
+    .then(reg => console.log("SW registrado:", reg.scope))
+    .catch(err => console.error("Error SW:", err));
 }
 
 
-/* ============================
-     PERMISO DE NOTIFICACIÓN
-============================ */
-async function pedirPermiso() {
-    if (!("Notification" in window)) {
-        alert("El navegador no soporta notificaciones.");
-        return false;
-    }
+// Nombre del caché (cámbialo cuando actualices archivos)
+const CACHE_NAME = 'v1.1_cache_Mariana_Munoz_PWA';
 
-    if (Notification.permission === "granted") return true;
+// Archivos que se guardarán en caché
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  './recetas.css',
+  './main.js',
+  './imagenes/fav.png'
+];
 
-    const permiso = await Notification.requestPermission();
-    return permiso === "granted";
-}
-
-
-/* ============================================
-   MOSTRAR NOTIFICACIÓN AL ENVIAR LA RECETA
-============================================ */
-document.addEventListener("DOMContentLoaded", () => {
-
-    const form = document.querySelector('#nueva-receta form');
-    if (!form) {
-        console.warn("Formulario de nueva receta no encontrado.");
-        return;
-    }
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const nombre = document.getElementById("nombre").value.trim();
-        const ingredientes = document.getElementById("ingredientes").value.trim();
-        const instrucciones = document.getElementById("instrucciones").value.trim();
-
-        if (!nombre) {
-            alert("Debes escribir el nombre de la receta.");
-            return;
-        }
-
-        // Pedir permiso de notificación
-        const permitido = await pedirPermiso();
-        if (!permitido) {
-            alert("Debes permitir notificaciones para continuar.");
-            return;
-        }
-
-        // Obtener registro del SW
-        const reg = await navigator.serviceWorker.getRegistration();
-
-        const opciones = {
-            body: `Ingredientes: ${ingredientes || "—"}\nInstrucciones: ${instrucciones || "—"}`,
-            icon: "imagenes/fav.png",
-            badge: "imagenes/fav.png",
-            vibrate: [200, 100, 200],
-            tag: "receta-nueva",
-            renotify: true
-        };
-
-        // Mostrar notificación
-        if (reg && reg.showNotification) {
-            reg.showNotification(`Nueva receta: ${nombre}`, opciones);
-        } else {
-            new Notification(`Nueva receta: ${nombre}`, opciones);
-        }
-
-        form.reset();
-    });
+// INSTALACIÓN — guardar archivos en caché
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
+      .catch(err => console.log('Error al cachear archivos:', err))
+  );
 });
 
+// ACTIVACIÓN — eliminar cachés anteriores
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
 
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(name => {
+          if (!cacheWhitelist.includes(name)) {
+            return caches.delete(name);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
 
+// FETCH — usar caché o red
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(res => res || fetch(event.request))
+  );
+});
 
+// SKIP WAITING manual
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
 
+// Notificaciones
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.openWindow('https://web.whatsapp.com/')
+  );
+});
