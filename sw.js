@@ -3,7 +3,7 @@
 const { cache } = require("react");
 
 // Asignar nombre y version de cache
-const CACHE_NAME= 'v1.1_cache_Mariana_Muñoz_PWA';
+const CACHE_NAME= 'v1.2_cache_Mariana_Muñoz_PWA';
 
 //Ficheros a cachear en la App
 var urlsTocCache=[
