@@ -326,7 +326,7 @@ app1.mount("body");
 <!-- Registro del Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/Recetario_Personal/service-worker.js")
+  navigator.serviceWorker.register("/Recetario_Personal/sw.js")
   .then(() => console.log("SW registrado"))
   .catch(err => console.log("Error SW:", err));
 }
