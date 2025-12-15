@@ -3,7 +3,7 @@
 // ------------------------
 
 // Nombre del caché (cámbialo cuando actualices archivos)
-const CACHE_NAME = 'v1.3_cache_recetario';
+const CACHE_NAME = 'v1.3_cache_refraccion';
 
 // Archivos a cachear
 const urlsToCache = [

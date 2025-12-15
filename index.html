@@ -46,14 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Validación sencilla
     if (!nombre) {
-      alert('Por favor escribe el nombre de la receta.');
+      alert('Por favor escribe el nombre de la pieza.');
       return;
     }
 
     // Pedir permiso de notificación (si no está concedido)
     const permitido = await solicitarPermisoNotificaciones();
     if (!permitido) {
-      alert('Necesitas permitir notificaciones para recibir la alerta de la receta.');
+      alert('Necesitas permitir notificaciones para recibir la alerta de la pieza.');
       return;
     }
 

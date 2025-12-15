@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ==== ENVIAR A WHATSAPP ====
-        const numeroWhats = "2751105385"; // <-- CAMBIA AQUÍ
+        const numeroWhats = "7571395902"
 
         const textoWhats =
             "*Nuevo registro guardado*\n\n" +

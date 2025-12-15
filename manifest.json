@@ -1,6 +1,6 @@
 {
-  "name": "Recetario Personal",
-  "short_name": "Recetario",
+  "name": "Refracción",
+  "short_name": "Refracción",
   "start_url": "./index.html?utm_source=web_app_manifest",
   "scope":"./",
   "display": "standalone",
